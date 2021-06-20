@@ -1,0 +1,14 @@
+{
+  "name": "Bombillos",
+  "version": "1.0.0",
+  "description": "Ejercicio de lógica.",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "start": "nodemon index",
+    "test": "(eslint lib || true) && jest"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.7"
+  }
+}
