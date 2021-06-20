@@ -163,24 +163,6 @@ class Bombillo {
     return hasLight;
   }
 
-  /**
-   * Verificamos si hay luz en la columna actual
-   */
-  checkForLightInColumn(column) {
-    let hasLight = false;
-
-    column.map(item => {
-      let keys = Object.keys(item);
-
-      if (item[keys[1]]) hasLight = true;
-    });
-
-    return hasLight;
-  }
-
-  /**
-   *Devolvemos la columna en la posicion actual
-   */
   getColumn(data, position) {
     let column = [];
 
@@ -190,24 +172,7 @@ class Bombillo {
 
     return column;
   }
-  /**
-   * Verificamos si hay luz en la fila actual
-   */
-  checkForLightInRow(row) {
-    let hasLight = false;
 
-    row.map(item => {
-      let keys = Object.keys(item);
-
-      if (item[keys[1]]) hasLight = true;
-    });
-
-    return hasLight;
-  }
-
-  /**
-   * Obtemos la diagonal derecha
-   */
   getRightDiagonal(data, rowCurrent, columnCurrent) {
     let rightDiagonal = [];
     let hasValue = Helper.convertArrayToALevel(data);
@@ -248,32 +213,6 @@ class Bombillo {
     });
 
     return leftDiagonal;
-  }
-  /**
-   * Verificamos las diagonal derecha
-   */
-  checkForLightInRightDiagonal(array) {
-    let hasLight = false;
-
-    array.map(item => {
-      let keys = Object.keys(item);
-
-      if (item[keys[1]]) hasLight = true;
-    });
-
-    return hasLight;
-  }
-
-  checkForLightInLeftDiagonal(array) {
-    let hasLight = false;
-
-    array.map(item => {
-      let keys = Object.keys(item);
-
-      if (item[keys[1]]) hasLight = true;
-    });
-
-    return hasLight;
   }
 }
 
