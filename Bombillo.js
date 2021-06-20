@@ -6,17 +6,10 @@ class Bombillo {
     let arrays = this.getSpaceSeparatedArray(data.split(/\r?\n/));
     let coord = this.getCoordinatesWithValue(arrays);
 
-    let d = this.dataDummy();
-    //console.log(d[0][0]);
     let newArray = this.putLight(this.dataDummy());
     this.showArray(newArray);
-    /*console.log(
-      "Left: " + JSON.stringify(this.getLeftDiagonal(this.dataDummy(), 3, 2))
-    );
-    console.log(
-      "Right: " + JSON.stringify(this.getRightDiagonal(this.dataDummy(), 3, 2))
-    );*/
   }
+
   showArray(data) {
     let str = "";
     data.map((array, row) => {
