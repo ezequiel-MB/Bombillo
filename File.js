@@ -1,16 +1,18 @@
 const fs = require("fs");
+const { STATUS } = require("./constants");
+const Helper = require("./Helper");
 
 class File {
   read(path, encoding = "utf-8") {
     let data = {};
 
     try {
-      data = {
-        message: true,
-        data: fs.readFileSync(path, { encoding: encoding })
-      };
+      data = Helper.process(
+        STATUS.OK,
+        fs.readFileSync(path, { encoding: encoding })
+      );
     } catch (errorCurrent) {
-      data = { message: false, data: errorCurrent };
+      data = Helper.process(STATUS.FAILED, errorCurrent);
     }
     return data;
   }

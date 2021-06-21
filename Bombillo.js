@@ -1,16 +1,39 @@
-const { ROOM } = require("./constants");
+const { ROOM, STATUS } = require("./constants");
 const Helper = require("./Helper");
 
 class Bombillo {
   distribution(data) {
-    let arrays = this.getSpaceSeparatedArray(data.split(/\r?\n/));
-    let coord = this.getCoordinatesWithValue(arrays);
+    let arrays = Helper.separatedStringArraysByRegex(
+      Helper.separateStringByRegex(data)
+    );
 
-    let newArray = this.putLight(this.dataDummy());
-    this.showArray(newArray);
+    if (!this.isValidData(arrays)) {
+      return Helper.process(
+        STATUS.FAILED,
+        "La matriz contiene un valor no permitdo."
+      );
+    }
+
+    let coord = this.getCoordinatesWithValue(arrays);
+    let distribution = this.putLight(coord.array);
+
+    return Helper.process(STATUS.OK, distribution);
   }
 
-  showArray(data) {
+  isValidData(data) {
+    let isValid = true;
+
+    data.map(array => {
+      array.map(item => {
+        if (item != ROOM.WITHOUT_WALL && item != ROOM.WITH_WALL)
+          isValid = false;
+      });
+    });
+
+    return isValid;
+  }
+
+  showRooms(data) {
     let str = "";
     data.map((array, row) => {
       array.map((item, column) => {
@@ -19,16 +42,6 @@ class Bombillo {
       console.log(str);
       str = "";
     });
-  }
-
-  getSpaceSeparatedArray(data) {
-    let array = [];
-
-    data.map(item => {
-      array.push(item.split(" "));
-    });
-
-    return array;
   }
 
   getCoordinatesWithValue(data) {
@@ -53,47 +66,6 @@ class Bombillo {
     return { array: coord, columns: columns, rows: rows / columns };
   }
 
-  dataDummy() {
-    return [
-      [
-        { "1,1": "0", hasLight: false },
-        { "1,2": "0", hasLight: false },
-        { "1,3": "0", hasLight: false },
-        { "1,4": "0", hasLight: false }
-      ],
-      [
-        { "2,1": "1", hasLight: false },
-        { "2,2": "0", hasLight: false },
-        { "2,3": "0", hasLight: false },
-        { "2,4": "0", hasLight: false }
-      ],
-      [
-        { "3,1": "0", hasLight: false },
-        { "3,2": "0", hasLight: false },
-        { "3,3": "0", hasLight: false },
-        { "3,4": "0", hasLight: false }
-      ],
-      [
-        { "4,1": "0", hasLight: false },
-        { "4,2": "0", hasLight: false },
-        { "4,3": "0", hasLight: false },
-        { "4,4": "0", hasLight: false }
-      ]
-    ];
-  }
-
-  /**
-    [
-    0 = [{ "1,1": "0" }, { "1,2": "0" }, { "1,3": "0" }, { "1,4": "1" }],
-    1 = [{ "2,1": "0" }, { "2,2": "0" }, { "2,3": "0" }, { "2,4": "0" }],
-    2 = [{ "3,1": "0" }, { "3,2": "0" }, { "3,3": "0" }, { "3,4": "0" }],
-    3 = [{ "4,1": "0" }, { "4,2": "0" }, { "4,3": "0" }, { "4,4": "0" }]
-    ] 
-   */
-
-  /**
-   * Colocamos luz
-   */
   putLight(arrays) {
     arrays.map((array, row) => {
       array.map((item, column) => {
@@ -112,7 +84,7 @@ class Bombillo {
 
           if (isValid) {
             arrays[row][column].hasLight = true;
-            arrays[row][column][`${row + 1},${column + 1}`] = "F";
+            arrays[row][column][`${row + 1},${column + 1}`] = ROOM.WITH_LIGHT;
           }
         }
       });
@@ -172,7 +144,7 @@ class Bombillo {
 
     data.map((array, row) => {
       let key = `${rowCurrent},${columnCurrent}`;
-      let isValue = this.findValue(hasValue, key);
+      let isValue = Helper.findValueByKey(hasValue, key);
 
       if (isValue != null && isValue[key]) {
         rightDiagonal.push(isValue);
@@ -185,17 +157,13 @@ class Bombillo {
     return rightDiagonal;
   }
 
-  findValue(array, key) {
-    return array.find(item => item[`${key}`]);
-  }
-
   getLeftDiagonal(data, rowCurrent, columnCurrent) {
     let leftDiagonal = [];
     let hasValue = Helper.convertArrayToALevel(data);
 
     data.map((array, row) => {
       let key = `${rowCurrent},${columnCurrent}`;
-      let isValue = this.findValue(hasValue, key);
+      let isValue = Helper.findValueByKey(hasValue, key);
 
       if (isValue != null && isValue[key]) {
         leftDiagonal.push(isValue);
