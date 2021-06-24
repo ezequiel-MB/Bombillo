@@ -74,7 +74,7 @@ const HTML = () => `
             <tr>
                <td style="background-color: white; color:white;">&#9788;</td>
                <td style="background-color: black">&#9788;</td>
-               <td style="background-color: yellow;">&#9788;</td>
+               <td style="background-color: white; color:white;">&#9788;</td>
                <td style="background-color: black">&#9788;</td>
             </tr>
          </table>
