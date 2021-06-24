@@ -1,5 +1,6 @@
 const { ROOM, STATUS } = require("./constants");
 const Helper = require("./Helper");
+const Point = require("./Point");
 
 class Bombillo {
   distribution(data) {
@@ -15,7 +16,7 @@ class Bombillo {
     }
 
     let coord = this.getCoordinatesWithValue(arrays);
-    let distribution = this.putLight(coord.array);
+    let distribution = this.putLight(coord.array, coord.rows, coord.columns);
 
     return Helper.process(STATUS.OK, distribution);
   }
@@ -46,12 +47,12 @@ class Bombillo {
 
   getCoordinatesWithValue(data) {
     let coord = [];
-    let columns = data.length;
-    let rows = 0;
+    let rows = data.length;
+    let columns = 0;
 
     data.map((array, indexArray) => {
       let position = [];
-      rows += array.length;
+      columns += array.length;
 
       array.map((item, indexItem) => {
         position.push({
@@ -63,10 +64,10 @@ class Bombillo {
       coord.push(position);
     });
 
-    return { array: coord, columns: columns, rows: rows / columns };
+    return { array: coord, rows: rows, columns: columns / rows };
   }
 
-  putLight(arrays) {
+  putLight(arrays, sizeRow, sizeColumn) {
     arrays.map((array, row) => {
       array.map((item, column) => {
         let rowCurrent = row + 1;
@@ -83,8 +84,20 @@ class Bombillo {
           });
 
           if (isValid) {
-            arrays[row][column].hasLight = true;
-            arrays[row][column][`${row + 1},${column + 1}`] = ROOM.WITH_LIGHT;
+            let coordObj = Helper.convertArrayToALevel(arrays);
+            let isValidPut = Point.isCorrect(
+              {
+                sizeRow: sizeRow,
+                sizeColumn: sizeColumn,
+                row: rowCurrent,
+                column: columnCurrent
+              },
+              coordObj
+            );
+            if (isValidPut) {
+              arrays[row][column].hasLight = true;
+              arrays[row][column][`${row + 1},${column + 1}`] = ROOM.WITH_LIGHT;
+            }
           }
         }
       });
@@ -107,9 +120,9 @@ class Bombillo {
 
     if (
       !hasLightColumn &&
-      !hasLightRow &&
-      !hasLightRightDiagonal &&
-      !hasLightLeftDiagonal
+      !hasLightRow
+      //&& !hasLightRightDiagonal &&
+      //!hasLightLeftDiagonal
     )
       return true;
 
@@ -143,15 +156,17 @@ class Bombillo {
     let hasValue = Helper.convertArrayToALevel(data);
 
     data.map((array, row) => {
-      let key = `${rowCurrent},${columnCurrent}`;
-      let isValue = Helper.findValueByKey(hasValue, key);
+      array.map((item, column) => {
+        let key = `${rowCurrent},${columnCurrent}`;
+        let isValue = Helper.findValueByKey(hasValue, key);
 
-      if (isValue != null && isValue[key]) {
-        rightDiagonal.push(isValue);
-      }
+        if (isValue != null && isValue[key]) {
+          rightDiagonal.push(isValue);
+        }
 
-      rowCurrent--;
-      columnCurrent--;
+        rowCurrent--;
+        columnCurrent--;
+      });
     });
 
     return rightDiagonal;
@@ -162,15 +177,17 @@ class Bombillo {
     let hasValue = Helper.convertArrayToALevel(data);
 
     data.map((array, row) => {
-      let key = `${rowCurrent},${columnCurrent}`;
-      let isValue = Helper.findValueByKey(hasValue, key);
+      array.map((item, column) => {
+        let key = `${rowCurrent},${columnCurrent}`;
+        let isValue = Helper.findValueByKey(hasValue, key);
 
-      if (isValue != null && isValue[key]) {
-        leftDiagonal.push(isValue);
-      }
+        if (isValue != null && isValue[key]) {
+          leftDiagonal.push(isValue);
+        }
 
-      rowCurrent--;
-      columnCurrent++;
+        rowCurrent--;
+        columnCurrent++;
+      });
     });
 
     return leftDiagonal;
