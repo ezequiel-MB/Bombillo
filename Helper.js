@@ -1,3 +1,5 @@
+const { ROOM } = require("./constants");
+
 class Helper {
   process(code, data) {
     return {
@@ -43,6 +45,14 @@ class Helper {
       currentTime.getSeconds();
 
     return time.toString();
+  }
+
+  findValueByKeyAndValue(array, key, value = ROOM.WITH_LIGHT) {
+    return array.find(item => item[`${key}`] == 0 && item[`${key}`] != value);
+  }
+
+  findValueByKey(array, key) {
+    return array.find(item => item[`${key}`]);
   }
 }
 
