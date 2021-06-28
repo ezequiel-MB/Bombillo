@@ -1,10 +1,6 @@
 const { ROOM } = require("./constants");
 
 class Point {
-  findValueByKeyAndValue(array, key, value = ROOM.WITH_LIGHT) {
-    return array.find(item => item[`${key}`] == 0 && item[`${key}`] != value);
-  }
-
   isCorrect(data, coord) {
     const { sizeRow, sizeColumn, row, column } = data;
 
@@ -132,10 +128,6 @@ class Point {
       roomsWithOutWallToTheRight++;
     }
 
-    this.log(
-      "total -> E: " + roomsWithOutWallToTheRight + " en la fila: " + row
-    );
-
     let roomsWithOutWallToTheDown = 0;
     let toTheDown = row + 1;
     for (let index = 0; index < sizeColumn; index++) {
@@ -148,10 +140,6 @@ class Point {
       toTheDown++;
       roomsWithOutWallToTheDown++;
     }
-
-    this.log(
-      "total -> S: " + roomsWithOutWallToTheDown + " en la columna: " + column
-    );
 
     if (
       roomsWithOutWallToTheRight + roomsWithOutWallToTheDown >=
@@ -166,6 +154,7 @@ class Point {
     const { sizeRow, sizeColumn, row, column } = data;
     const roomsWithLigthAllowedMax = 4;
     const roomsWithLigthAllowedMin = 3;
+
     let isAllowed = false;
 
     let roomsWithOutWallToTheRight = 0;
@@ -181,26 +170,48 @@ class Point {
       toTheRight++;
     }
 
-    this.log(
-      "Total -> E: " + roomsWithOutWallToTheRight + " columna: " + column
-    );
-
     let roomsWithOutWallToTheLeft = 0;
     let toTheLeft = column - 1;
+
+    let roomsWithWall = 0;
+    let distanceFromCurrentPointToLight = 0;
+    let cont = 0;
+    let thereAreWall = false;
+    let thereAreLight = false;
+    let totalToTheLeft = 0;
+
     for (let index = toTheLeft; index > 0; index--) {
       let key = `${row},${toTheLeft}`;
-      let withWall = this.findValueByKeyAndValue(coord, key);
+      let withWall = this.findValueByKey(coord, key);
+      let value = withWall[key];
 
-      if (!withWall) {
+      toTheLeft--;
+      cont++;
+
+      if (value != null && value == ROOM.WITHOUT_WALL) {
+        roomsWithOutWallToTheLeft++;
+        continue;
+      }
+
+      if (value != null && value == ROOM.WITH_WALL) {
+        roomsWithWall++;
+        if (roomsWithWall == 1) totalToTheLeft = roomsWithOutWallToTheLeft;
+
         break;
       }
-      roomsWithOutWallToTheLeft++;
-      toTheLeft--;
+
+      if (value != null && value == ROOM.WITH_LIGHT) {
+        thereAreLight = true;
+        distanceFromCurrentPointToLight = cont - 1;
+        totalToTheLeft = roomsWithOutWallToTheLeft;
+
+        if (roomsWithWall > 0) thereAreWall = true;
+
+        break;
+      }
     }
 
-    this.log(
-      "Total -> O: " + roomsWithOutWallToTheLeft + " columna: " + column
-    );
+    if (totalToTheLeft == 0) totalToTheLeft = roomsWithOutWallToTheLeft;
 
     let roomsWithOutWallToTheDown = 0;
     let toTheDown = row + 1;
@@ -215,19 +226,25 @@ class Point {
       roomsWithOutWallToTheDown++;
     }
 
-    this.log(
-      "Total -> S: " + roomsWithOutWallToTheDown + " en la fila: " + row
-    );
-
     let totalRoomsWithOutWall =
-      roomsWithOutWallToTheRight +
-      roomsWithOutWallToTheLeft +
-      roomsWithOutWallToTheDown;
-    if (
-      totalRoomsWithOutWall >= roomsWithLigthAllowedMax ||
-      totalRoomsWithOutWall >= roomsWithLigthAllowedMin
-    )
-      isAllowed = true;
+      roomsWithOutWallToTheRight + totalToTheLeft + roomsWithOutWallToTheDown;
+
+    if (thereAreLight) {
+      if (thereAreWall) {
+        if (totalRoomsWithOutWall >= roomsWithLigthAllowedMax) isAllowed = true;
+        else isAllowed = false;
+      } else {
+        if (distanceFromCurrentPointToLight >= roomsWithLigthAllowedMax) {
+          if (totalRoomsWithOutWall >= roomsWithLigthAllowedMax)
+            isAllowed = true;
+        } else {
+          isAllowed = false;
+        }
+      }
+    } else {
+      if (totalRoomsWithOutWall >= roomsWithLigthAllowedMax) isAllowed = true;
+      else isAllowed = false;
+    }
 
     return isAllowed;
   }
@@ -250,10 +267,6 @@ class Point {
       toTheLeft--;
     }
 
-    this.log(
-      "Total -> O: " + roomsWithOutWallToTheLeft + " en la fila: " + row
-    );
-
     let roomsWithOutWallToTheDown = 0;
     let toTheDown = row + 1;
     for (let index = 0; index < sizeColumn; index++) {
@@ -266,10 +279,6 @@ class Point {
       toTheDown++;
       roomsWithOutWallToTheDown++;
     }
-
-    this.log(
-      "Total -> S: " + roomsWithOutWallToTheDown + " en la columna: " + column
-    );
 
     if (
       roomsWithOutWallToTheLeft + roomsWithOutWallToTheDown >=
@@ -288,20 +297,47 @@ class Point {
 
     let roomsWithOutWallToTheUp = 0;
     let toTheUp = row - 1;
+
+    let roomsWithWall = 0;
+    let distanceFromCurrentPointToLight = 0;
+    let cont = 0;
+    let thereAreWall = false;
+    let thereAreLight = false;
+    let totalToTheUp = 0;
+
     for (let index = toTheUp; index > 0; index--) {
       let key = `${toTheUp},${column}`;
-      let withWall = this.findValueByKeyAndValue(coord, key);
+      let withWall = this.findValueByKey(coord, key);
+      let value = withWall[key];
 
-      if (!withWall) {
+      toTheUp--;
+      cont++;
+
+      if (value != null && value == ROOM.WITHOUT_WALL) {
+        roomsWithOutWallToTheUp++;
+        continue;
+      }
+
+      if (value != null && value == ROOM.WITH_WALL) {
+        roomsWithWall++;
+
+        if (roomsWithWall == 1) totalToTheUp = roomsWithOutWallToTheUp;
+
         break;
       }
-      roomsWithOutWallToTheUp++;
-      toTheUp--;
+
+      if (value != null && value == ROOM.WITH_LIGHT) {
+        thereAreLight = true;
+        distanceFromCurrentPointToLight = cont - 1;
+        totalToTheUp = roomsWithOutWallToTheUp;
+
+        if (roomsWithWall > 0) thereAreWall = true;
+
+        break;
+      }
     }
 
-    this.log(
-      "Total -> N: " + roomsWithOutWallToTheUp + " en la columna: " + column
-    );
+    if (totalToTheUp == 0) totalToTheUp = roomsWithOutWallToTheUp;
 
     let roomsWithOutWallToTheDown = 0;
     let toTheDown = row + 1;
@@ -317,10 +353,6 @@ class Point {
       toTheDown++;
     }
 
-    this.log(
-      "Total -> S: " + roomsWithOutWallToTheDown + " en la columna: " + column
-    );
-
     let roomsWithOutWallToTheRight = 0;
     let toTheRight = column + 1;
     for (let index = column; index < sizeColumn; index++) {
@@ -334,43 +366,76 @@ class Point {
       roomsWithOutWallToTheRight++;
     }
 
-    this.log(
-      "Total -> E: " + roomsWithOutWallToTheRight + " en la fila: " + row
-    );
-
     let totalRoomsWithOutWall =
-      roomsWithOutWallToTheUp +
-      roomsWithOutWallToTheDown +
-      roomsWithOutWallToTheRight;
+      totalToTheUp + roomsWithOutWallToTheDown + roomsWithOutWallToTheRight;
 
-    if (
-      totalRoomsWithOutWall >= roomsWithLigthAllowedMax ||
-      totalRoomsWithOutWall >= roomsWithLigthAllowedMin
-    )
-      isAllowed = true;
+    if (thereAreLight) {
+      if (thereAreWall) {
+        if (totalRoomsWithOutWall >= roomsWithLigthAllowedMax) isAllowed = true;
+        else isAllowed = true;
+      } else {
+        if (distanceFromCurrentPointToLight >= roomsWithLigthAllowedMax) {
+          if (totalRoomsWithOutWall >= roomsWithLigthAllowedMax)
+            isAllowed = true;
+        } else {
+          isAllowed = false;
+        }
+      }
+    } else {
+      if (totalRoomsWithOutWall >= roomsWithLigthAllowedMax) isAllowed = true;
+      else isAllowed = false;
+    }
 
     return isAllowed;
   }
 
   case_5(data, coord) {
     const { sizeRow, sizeColumn, row, column } = data;
-    const roomsWithLigthAllowed = 4;
+    const roomsWithLigthAllowedMax = 4;
     let isAllowed = false;
 
     let roomsWithOutWallToTheUp = 0;
     let toTheUp = row - 1;
-    for (let index = 0; index < sizeRow; index++) {
-      let key = `${toTheUp},${column}`;
-      let withWall = this.findValueByKeyAndValue(coord, key);
 
-      if (!withWall) {
+    let roomsWithWall = 0;
+    let distanceFromCurrentPointToLight = 0;
+    let cont = 0;
+    let thereAreWall = false;
+    let thereAreLight = false;
+    let totalToTheUp = 0;
+
+    for (let index = toTheUp; index > 0; index--) {
+      let key = `${toTheUp},${column}`;
+      let withWall = this.findValueByKey(coord, key);
+      let value = withWall[key];
+
+      toTheUp--;
+      cont++;
+
+      if (value != null && value == ROOM.WITHOUT_WALL) {
+        roomsWithOutWallToTheUp++;
+        continue;
+      }
+
+      if (value != null && value == ROOM.WITH_WALL) {
+        roomsWithWall++;
+        if (roomsWithWall == 1) totalToTheUp = roomsWithOutWallToTheUp;
+
         break;
       }
-      toTheUp--;
-      roomsWithOutWallToTheUp++;
+
+      if (value != null && value == ROOM.WITH_LIGHT) {
+        thereAreLight = true;
+        distanceFromCurrentPointToLight = cont - 1;
+        totalToTheUp = roomsWithOutWallToTheUp;
+
+        if (roomsWithWall > 0) thereAreWall = true;
+
+        break;
+      }
     }
 
-    this.log("Total -> N: " + roomsWithOutWallToTheUp + " en la fila: " + row);
+    if (totalToTheUp == 0) totalToTheUp = roomsWithOutWallToTheUp;
 
     let roomsWithOutWallToTheRight = 0;
     let toTheRight = column + 1;
@@ -385,15 +450,24 @@ class Point {
       roomsWithOutWallToTheRight++;
     }
 
-    this.log(
-      "Total -> E: " + roomsWithOutWallToTheRight + " en la fila: " + row
-    );
+    let totalRoomsWithOutWall = roomsWithOutWallToTheRight + totalToTheUp;
 
-    if (
-      roomsWithOutWallToTheRight + roomsWithOutWallToTheUp >=
-      roomsWithLigthAllowed
-    )
-      isAllowed = true;
+    if (thereAreLight) {
+      if (thereAreWall) {
+        if (totalRoomsWithOutWall >= roomsWithLigthAllowedMax) isAllowed = true;
+        else isAllowed = false;
+      } else {
+        if (distanceFromCurrentPointToLight >= roomsWithLigthAllowedMax) {
+          if (totalRoomsWithOutWall >= roomsWithLigthAllowedMax)
+            isAllowed = true;
+        } else {
+          isAllowed = false;
+        }
+      }
+    } else {
+      if (totalRoomsWithOutWall >= roomsWithLigthAllowedMax) isAllowed = true;
+      else isAllowed = false;
+    }
 
     return isAllowed;
   }
@@ -406,18 +480,47 @@ class Point {
 
     let roomsWithOutWallToTheUp = 0;
     let toTheUp = row - 1;
-    for (let index = 0; index < sizeRow; index++) {
-      let key = `${toTheUp},${column}`;
-      let withWall = this.findValueByKeyAndValue(coord, key);
 
-      if (!withWall) {
+    let roomsWithWallToTheUp = 0;
+    let distanceFromCurrentPointToLightToUp = 0;
+    let contToTheUp = 0;
+    let thereAreWallToTheUp = false;
+    let thereAreLightToTheUp = false;
+    let totalToTheUp = 0;
+
+    for (let index = toTheUp; index > 0; index--) {
+      let key = `${toTheUp},${column}`;
+      let withWall = this.findValueByKey(coord, key);
+      let value = withWall[key];
+
+      toTheUp--;
+      contToTheUp++;
+
+      if (value != null && value == ROOM.WITHOUT_WALL) {
+        roomsWithOutWallToTheUp++;
+        continue;
+      }
+
+      if (value != null && value == ROOM.WITH_WALL) {
+        roomsWithWallToTheUp++;
+        if (roomsWithWallToTheUp == 1) {
+          totalToTheUp = roomsWithOutWallToTheUp;
+        }
+
         break;
       }
-      toTheUp--;
-      roomsWithOutWallToTheUp++;
+
+      if (value != null && value == ROOM.WITH_LIGHT) {
+        thereAreLightToTheUp = true;
+        distanceFromCurrentPointToLightToUp = contToTheUp - 1;
+        totalToTheUp = roomsWithOutWallToTheUp;
+        if (roomsWithWallToTheUp > 0) thereAreWallToTheUp = true;
+
+        break;
+      }
     }
 
-    this.log("Total -> N: " + roomsWithOutWallToTheUp + " en la fila: " + row);
+    if (totalToTheUp == 0) totalToTheUp = roomsWithOutWallToTheUp;
 
     let roomsWithOutWallToTheRight = 0;
     let toTheRight = column + 1;
@@ -432,37 +535,114 @@ class Point {
       roomsWithOutWallToTheRight++;
     }
 
-    this.log(
-      "Total -> E : " + roomsWithOutWallToTheRight + " en la fila: " + row
-    );
-
     let roomsWithOutWallToTheLeft = 0;
     let toTheLeft = column - 1;
+
+    let roomsWithWallToTheLeft = 0;
+    let distanceFromCurrentPointToLightToLeft = 0;
+    let contToTheLeft = 0;
+    let thereAreWallToTheLeft = false;
+    let thereAreLightToTheLeft = false;
+    let totalToTheLeft = 0;
+
     for (let index = toTheLeft; index > 0; index--) {
       let key = `${row},${toTheLeft}`;
-      let withWall = this.findValueByKeyAndValue(coord, key);
+      let withWall = this.findValueByKey(coord, key);
+      let value = withWall[key];
 
-      if (!withWall) {
+      toTheLeft--;
+      contToTheLeft++;
+
+      if (value != null && value == ROOM.WITHOUT_WALL) {
+        roomsWithOutWallToTheLeft++;
+        continue;
+      }
+
+      if (value != null && value == ROOM.WITH_WALL) {
+        roomsWithWallToTheLeft++;
+        if (roomsWithWallToTheLeft == 1) {
+          totalToTheLeft = roomsWithOutWallToTheLeft;
+        }
+
         break;
       }
-      roomsWithOutWallToTheLeft++;
-      toTheLeft--;
+
+      if (value != null && value == ROOM.WITH_LIGHT) {
+        thereAreLightToTheLeft = true;
+        distanceFromCurrentPointToLightToLeft = contToTheLeft - 1;
+        totalToTheLeft = roomsWithOutWallToTheLeft;
+        if (roomsWithWallToTheLeft > 0) thereAreWallToTheLeft = true;
+
+        break;
+      }
     }
 
-    this.log(
-      "Total -> O: " + roomsWithOutWallToTheLeft + " en la fila: " + row
-    );
+    if (totalToTheLeft == 0) totalToTheLeft = roomsWithOutWallToTheLeft;
 
     let totalRoomsWithOutWall =
-      roomsWithOutWallToTheUp +
-      roomsWithOutWallToTheRight +
-      roomsWithOutWallToTheLeft;
+      totalToTheUp + roomsWithOutWallToTheRight + totalToTheLeft;
 
-    if (
-      totalRoomsWithOutWall >= roomsWithLigthAllowedMax ||
-      totalRoomsWithOutWall >= roomsWithLigthAllowedMin
-    )
-      isAllowed = true;
+    if (thereAreLightToTheUp && thereAreLightToTheLeft) {
+      if (thereAreWallToTheUp && thereAreWallToTheLeft) {
+        if (totalRoomsWithOutWall >= roomsWithLigthAllowedMax) {
+          isAllowed = true;
+        } else {
+          isAllowed = false;
+        }
+      } else if (thereAreWallToTheUp && !thereAreWallToTheLeft) {
+        if (distanceFromCurrentPointToLightToLeft >= roomsWithLigthAllowedMax) {
+          if (totalRoomsWithOutWall >= roomsWithLigthAllowedMax)
+            isAllowed = true;
+          else isAllowed = false;
+        } else {
+          isAllowed = false;
+        }
+      } else if (thereAreWallToTheLeft && !thereAreWallToTheUp) {
+        if (distanceFromCurrentPointToLightToUp >= roomsWithLigthAllowedMax) {
+          if (totalRoomsWithOutWall >= roomsWithLigthAllowedMax)
+            isAllowed = true;
+        } else {
+          isAllowed = false;
+        }
+      } else {
+        if (
+          distanceFromCurrentPointToLightToUp >= roomsWithLigthAllowedMax &&
+          distanceFromCurrentPointToLightToLeft >= roomsWithLigthAllowedMax
+        ) {
+          if (totalRoomsWithOutWall >= roomsWithLigthAllowedMax)
+            isAllowed = true;
+        } else {
+          isAllowed = false;
+        }
+      }
+    } else if (thereAreLightToTheUp && !thereAreLightToTheLeft) {
+      if (thereAreWallToTheUp) {
+        if (totalRoomsWithOutWall >= roomsWithLigthAllowedMax) isAllowed = true;
+        else isAllowed = false;
+      } else {
+        if (distanceFromCurrentPointToLightToUp >= roomsWithLigthAllowedMax) {
+          if (totalRoomsWithOutWall >= roomsWithLigthAllowedMax)
+            isAllowed = true;
+        } else {
+          isAllowed = false;
+        }
+      }
+    } else if (thereAreLightToTheLeft && !thereAreLightToTheUp) {
+      if (thereAreWallToTheLeft) {
+        if (totalRoomsWithOutWall >= roomsWithLigthAllowedMax) isAllowed = true;
+        else isAllowed = false;
+      } else {
+        if (distanceFromCurrentPointToLightToLeft >= roomsWithLigthAllowedMax) {
+          if (totalRoomsWithOutWall >= roomsWithLigthAllowedMax)
+            isAllowed = true;
+        } else {
+          isAllowed = false;
+        }
+      }
+    } else {
+      if (totalRoomsWithOutWall >= roomsWithLigthAllowedMax) isAllowed = true;
+      else isAllowed = false;
+    }
 
     return isAllowed;
   }
@@ -475,18 +655,47 @@ class Point {
 
     let roomsWithOutWallToTheLeft = 0;
     let toTheLeft = column - 1;
+
+    let roomsWithWallToTheLeft = 0;
+    let distanceFromCurrentPointToLightToLeft = 0;
+    let contToTheLeft = 0;
+    let thereAreWallToTheLeft = false;
+    let thereAreLightToTheLeft = false;
+    let totalToTheLeft = 0;
+
     for (let index = toTheLeft; index > 0; index--) {
       let key = `${row},${toTheLeft}`;
-      let withWall = this.findValueByKeyAndValue(coord, key);
+      let withWall = this.findValueByKey(coord, key);
+      let value = withWall[key];
 
-      if (!withWall) {
+      toTheLeft--;
+      contToTheLeft++;
+
+      if (value != null && value == ROOM.WITHOUT_WALL) {
+        roomsWithOutWallToTheLeft++;
+        continue;
+      }
+
+      if (value != null && value == ROOM.WITH_WALL) {
+        roomsWithWallToTheLeft++;
+        if (roomsWithWallToTheLeft == 1) {
+          totalToTheLeft = roomsWithOutWallToTheLeft;
+        }
+
         break;
       }
-      roomsWithOutWallToTheLeft++;
-      toTheLeft--;
+
+      if (value != null && value == ROOM.WITH_LIGHT) {
+        thereAreLightToTheLeft = true;
+        distanceFromCurrentPointToLightToLeft = contToTheLeft - 1;
+        totalToTheLeft = roomsWithOutWallToTheLeft;
+        if (roomsWithWallToTheLeft > 0) thereAreWallToTheLeft = true;
+
+        break;
+      }
     }
 
-    this.log("Total -> O " + roomsWithOutWallToTheLeft + " en la fila: " + row);
+    if (totalToTheLeft == 0) totalToTheLeft = roomsWithOutWallToTheLeft;
 
     let roomsWithOutWallToTheDown = 0;
     let toTheDown = row + 1;
@@ -501,81 +710,273 @@ class Point {
       roomsWithOutWallToTheDown++;
     }
 
-    this.log(
-      "Total -> S: " + roomsWithOutWallToTheDown + " en la columna: " + column
-    );
-
     let roomsWithOutWallToTheUp = 0;
     let toTheUp = row - 1;
-    for (let index = 0; index < sizeRow; index++) {
-      let key = `${toTheUp},${column}`;
-      let withWall = this.findValueByKeyAndValue(coord, key);
 
-      if (!withWall) {
+    let roomsWithWallToTheUp = 0;
+    let distanceFromCurrentPointToLightToUp = 0;
+    let contToTheUp = 0;
+    let thereAreWallToTheUp = false;
+    let thereAreLightToTheUp = false;
+    let totalToTheUp = 0;
+
+    for (let index = toTheUp; index > 0; index--) {
+      let key = `${toTheUp},${column}`;
+      let withWall = this.findValueByKey(coord, key);
+      let value = withWall[key];
+
+      toTheUp--;
+      contToTheUp++;
+      if (value != null && value == ROOM.WITHOUT_WALL) {
+        roomsWithOutWallToTheUp++;
+        continue;
+      }
+
+      if (value != null && value == ROOM.WITH_WALL) {
+        roomsWithWallToTheUp++;
+        if (roomsWithWallToTheUp == 1) {
+          totalToTheUp = roomsWithOutWallToTheUp;
+        }
+
         break;
       }
-      toTheUp--;
-      roomsWithOutWallToTheUp++;
+
+      if (value != null && value == ROOM.WITH_LIGHT) {
+        thereAreLightToTheUp = true;
+        distanceFromCurrentPointToLightToUp = contToTheUp - 1;
+        totalToTheUp = roomsWithOutWallToTheUp;
+        if (roomsWithWallToTheUp > 0) thereAreWallToTheUp = true;
+
+        break;
+      }
     }
 
-    this.log("Total -> N: " + roomsWithOutWallToTheUp + " en la fila: " + row);
+    if (totalToTheUp == 0) totalToTheUp = roomsWithOutWallToTheUp;
 
     let totalRoomsWithOutWall =
-      roomsWithOutWallToTheLeft +
-      roomsWithOutWallToTheDown +
-      roomsWithOutWallToTheUp;
+      totalToTheUp + roomsWithOutWallToTheDown + totalToTheLeft;
 
-    if (
-      totalRoomsWithOutWall >= roomsWithLigthAllowedMax ||
-      totalRoomsWithOutWall >= roomsWithLigthAllowedMin
-    )
-      isAllowed = true;
+    if (thereAreLightToTheUp && thereAreLightToTheLeft) {
+      if (thereAreWallToTheUp && thereAreWallToTheLeft) {
+        if (totalRoomsWithOutWall >= roomsWithLigthAllowedMax) {
+          isAllowed = true;
+        } else {
+          isAllowed = false;
+        }
+      } else if (thereAreWallToTheUp && !thereAreWallToTheLeft) {
+        if (distanceFromCurrentPointToLightToLeft >= roomsWithLigthAllowedMax) {
+          if (totalRoomsWithOutWall >= roomsWithLigthAllowedMax)
+            isAllowed = true;
+          else isAllowed = false;
+        } else {
+          isAllowed = false;
+        }
+      } else if (thereAreWallToTheLeft && !thereAreWallToTheUp) {
+        if (distanceFromCurrentPointToLightToUp >= roomsWithLigthAllowedMax) {
+          if (totalRoomsWithOutWall >= roomsWithLigthAllowedMax)
+            isAllowed = true;
+        } else {
+          isAllowed = false;
+        }
+      } else {
+        if (
+          distanceFromCurrentPointToLightToUp >= roomsWithLigthAllowedMax &&
+          distanceFromCurrentPointToLightToLeft >= roomsWithLigthAllowedMax
+        ) {
+          if (totalRoomsWithOutWall >= roomsWithLigthAllowedMax)
+            isAllowed = true;
+        } else {
+          isAllowed = false;
+        }
+      }
+    } else if (thereAreLightToTheUp && !thereAreLightToTheLeft) {
+      if (thereAreWallToTheUp) {
+        if (totalRoomsWithOutWall >= roomsWithLigthAllowedMax) isAllowed = true;
+        else isAllowed = false;
+      } else {
+        if (distanceFromCurrentPointToLightToUp >= roomsWithLigthAllowedMax) {
+          if (totalRoomsWithOutWall >= roomsWithLigthAllowedMax)
+            isAllowed = true;
+        } else {
+          isAllowed = false;
+        }
+      }
+    } else if (thereAreLightToTheLeft && !thereAreLightToTheUp) {
+      if (thereAreWallToTheLeft) {
+        if (totalRoomsWithOutWall >= roomsWithLigthAllowedMax) isAllowed = true;
+        else isAllowed = false;
+      } else {
+        if (distanceFromCurrentPointToLightToLeft >= roomsWithLigthAllowedMax) {
+          if (totalRoomsWithOutWall >= roomsWithLigthAllowedMax)
+            isAllowed = true;
+        } else {
+          isAllowed = false;
+        }
+      }
+    } else {
+      if (totalRoomsWithOutWall >= roomsWithLigthAllowedMax) isAllowed = true;
+      else isAllowed = false;
+    }
 
     return isAllowed;
   }
 
   case_8(data, coord) {
     const { sizeRow, sizeColumn, row, column } = data;
-    const roomsWithLigthAllowed = 4;
+    const roomsWithLigthAllowedMax = 4;
     let isAllowed = false;
 
     let roomsWithOutWallToTheUp = 0;
     let toTheUp = row - 1;
-    for (let index = 0; index < sizeRow; index++) {
-      let key = `${toTheUp},${column}`;
-      let withWall = this.findValueByKeyAndValue(coord, key);
 
-      if (!withWall) {
+    let roomsWithWallToTheUp = 0;
+    let distanceFromCurrentPointToLightToUp = 0;
+    let contToTheUp = 0;
+    let thereAreWallToTheUp = false;
+    let thereAreLightToTheUp = false;
+    let totalToTheUp = 0;
+
+    for (let index = toTheUp; index > 0; index--) {
+      let key = `${toTheUp},${column}`;
+      let withWall = this.findValueByKey(coord, key);
+      let value = withWall[key];
+
+      toTheUp--;
+      contToTheUp++;
+      if (value != null && value == ROOM.WITHOUT_WALL) {
+        roomsWithOutWallToTheUp++;
+        continue;
+      }
+
+      if (value != null && value == ROOM.WITH_WALL) {
+        roomsWithWallToTheUp++;
+        if (roomsWithWallToTheUp == 1) {
+          totalToTheUp = roomsWithOutWallToTheUp;
+        }
+
         break;
       }
-      toTheUp--;
-      roomsWithOutWallToTheUp++;
+
+      if (value != null && value == ROOM.WITH_LIGHT) {
+        thereAreLightToTheUp = true;
+        distanceFromCurrentPointToLightToUp = contToTheUp - 1;
+        totalToTheUp = roomsWithOutWallToTheUp;
+        if (roomsWithWallToTheUp > 0) thereAreWallToTheUp = true;
+
+        break;
+      }
     }
 
-    this.log("Total -> N: " + roomsWithOutWallToTheUp + " en la fila: " + row);
+    if (totalToTheUp == 0) totalToTheUp = roomsWithOutWallToTheUp;
 
     let roomsWithOutWallToTheLeft = 0;
     let toTheLeft = column - 1;
+
+    let roomsWithWallToTheLeft = 0;
+    let distanceFromCurrentPointToLightToLeft = 0;
+    let contToTheLeft = 0;
+    let thereAreWallToTheLeft = false;
+    let thereAreLightToTheLeft = false;
+    let totalToTheLeft = 0;
+
     for (let index = toTheLeft; index > 0; index--) {
       let key = `${row},${toTheLeft}`;
-      let withWall = this.findValueByKeyAndValue(coord, key);
+      let withWall = this.findValueByKey(coord, key);
+      let value = withWall[key];
 
-      if (!withWall) {
+      toTheLeft--;
+
+      contToTheLeft++;
+
+      if (value != null && value == ROOM.WITHOUT_WALL) {
+        roomsWithOutWallToTheLeft++;
+        continue;
+      }
+
+      if (value != null && value == ROOM.WITH_WALL) {
+        roomsWithWallToTheLeft++;
+        if (roomsWithWallToTheLeft == 1) {
+          totalToTheLeft = roomsWithOutWallToTheLeft;
+        }
+
         break;
       }
-      roomsWithOutWallToTheLeft++;
-      toTheLeft--;
+
+      if (value != null && value == ROOM.WITH_LIGHT) {
+        thereAreLightToTheLeft = true;
+        distanceFromCurrentPointToLightToLeft = contToTheLeft - 1;
+        totalToTheLeft = roomsWithOutWallToTheLeft;
+        if (roomsWithWallToTheLeft > 0) thereAreWallToTheLeft = true;
+
+        break;
+      }
     }
 
-    this.log(
-      "Total -> O: " + roomsWithOutWallToTheLeft + " en la fila: " + row
-    );
+    if (totalToTheLeft == 0) totalToTheLeft = roomsWithOutWallToTheLeft;
 
-    if (
-      roomsWithOutWallToTheLeft + roomsWithOutWallToTheUp >=
-      roomsWithLigthAllowed
-    )
-      isAllowed = true;
+    let totalRoomsWithOutWall = totalToTheUp + totalToTheLeft;
+
+    if (thereAreLightToTheUp && thereAreLightToTheLeft) {
+      if (thereAreWallToTheUp && thereAreWallToTheLeft) {
+        if (totalRoomsWithOutWall >= roomsWithLigthAllowedMax) {
+          isAllowed = true;
+        } else {
+          isAllowed = false;
+        }
+      } else if (thereAreWallToTheUp && !thereAreWallToTheLeft) {
+        if (distanceFromCurrentPointToLightToLeft >= roomsWithLigthAllowedMax) {
+          if (totalRoomsWithOutWall >= roomsWithLigthAllowedMax)
+            isAllowed = true;
+          else isAllowed = false;
+        } else {
+          isAllowed = false;
+        }
+      } else if (thereAreWallToTheLeft && !thereAreWallToTheUp) {
+        if (distanceFromCurrentPointToLightToUp >= roomsWithLigthAllowedMax) {
+          if (totalRoomsWithOutWall >= roomsWithLigthAllowedMax)
+            isAllowed = true;
+        } else {
+          isAllowed = false;
+        }
+      } else {
+        if (
+          distanceFromCurrentPointToLightToUp >= roomsWithLigthAllowedMax &&
+          distanceFromCurrentPointToLightToLeft >= roomsWithLigthAllowedMax
+        ) {
+          if (totalRoomsWithOutWall >= roomsWithLigthAllowedMax)
+            isAllowed = true;
+        } else {
+          isAllowed = false;
+        }
+      }
+    } else if (thereAreLightToTheUp && !thereAreLightToTheLeft) {
+      if (thereAreWallToTheUp) {
+        if (totalRoomsWithOutWall >= roomsWithLigthAllowedMax) isAllowed = true;
+        else isAllowed = false;
+      } else {
+        if (distanceFromCurrentPointToLightToUp >= roomsWithLigthAllowedMax) {
+          if (totalRoomsWithOutWall >= roomsWithLigthAllowedMax)
+            isAllowed = true;
+        } else {
+          isAllowed = false;
+        }
+      }
+    } else if (thereAreLightToTheLeft && !thereAreLightToTheUp) {
+      if (thereAreWallToTheLeft) {
+        if (totalRoomsWithOutWall >= roomsWithLigthAllowedMax) isAllowed = true;
+        else isAllowed = false;
+      } else {
+        if (distanceFromCurrentPointToLightToLeft >= roomsWithLigthAllowedMax) {
+          if (totalRoomsWithOutWall >= roomsWithLigthAllowedMax)
+            isAllowed = true;
+        } else {
+          isAllowed = false;
+        }
+      }
+    } else {
+      if (totalRoomsWithOutWall >= roomsWithLigthAllowedMax) isAllowed = true;
+      else isAllowed = false;
+    }
 
     return isAllowed;
   }
@@ -599,10 +1000,6 @@ class Point {
       roomsWithOutWallToTheRight++;
     }
 
-    this.log(
-      "Total -> E : " + roomsWithOutWallToTheRight + " en la fila: " + row
-    );
-
     let roomsWithOutWallToTheDown = 0;
     let toTheDown = row + 1;
     for (let index = 0; index < sizeRow; index++) {
@@ -616,57 +1013,172 @@ class Point {
       roomsWithOutWallToTheDown++;
     }
 
-    this.log(
-      "Total -> S: " + roomsWithOutWallToTheDown + " en la columna: " + column
-    );
-
     let roomsWithOutWallToTheLeft = 0;
     let toTheLeft = column - 1;
+
+    let roomsWithWallToTheLeft = 0;
+    let distanceFromCurrentPointToLightToLeft = 0;
+    let contToTheLeft = 0;
+    let thereAreWallToTheLeft = false;
+    let thereAreLightToTheLeft = false;
+    let totalToTheLeft = 0;
+
     for (let index = toTheLeft; index > 0; index--) {
       let key = `${row},${toTheLeft}`;
-      let withWall = this.findValueByKeyAndValue(coord, key);
+      let withWall = this.findValueByKey(coord, key);
+      let value = withWall[key];
 
-      if (!withWall) {
+      toTheLeft--;
+      contToTheLeft++;
+
+      if (value != null && value == ROOM.WITHOUT_WALL) {
+        roomsWithOutWallToTheLeft++;
+        continue;
+      }
+
+      if (value != null && value == ROOM.WITH_WALL) {
+        roomsWithWallToTheLeft++;
+        if (roomsWithWallToTheLeft == 1) {
+          totalToTheLeft = roomsWithOutWallToTheLeft;
+        }
+
         break;
       }
-      roomsWithOutWallToTheLeft++;
-      toTheLeft--;
+
+      if (value != null && value == ROOM.WITH_LIGHT) {
+        thereAreLightToTheLeft = true;
+        distanceFromCurrentPointToLightToLeft = contToTheLeft - 1;
+        totalToTheLeft = roomsWithOutWallToTheLeft;
+        if (roomsWithWallToTheLeft > 0) thereAreWallToTheLeft = true;
+
+        break;
+      }
     }
 
-    this.log(
-      "Total -> O: " + roomsWithOutWallToTheLeft + " en la fila: " + row
-    );
+    if (totalToTheLeft == 0) totalToTheLeft = roomsWithOutWallToTheLeft;
 
     let roomsWithOutWallToTheUp = 0;
     let toTheUp = row - 1;
-    for (let index = 0; index < sizeRow; index++) {
-      let key = `${toTheUp},${column}`;
-      let withWall = this.findValueByKeyAndValue(coord, key);
 
-      if (!withWall) {
+    let roomsWithWallToTheUp = 0;
+    let distanceFromCurrentPointToLightToUp = 0;
+    let contToTheUp = 0;
+    let thereAreWallToTheUp = false;
+    let thereAreLightToTheUp = false;
+    let totalToTheUp = 0;
+
+    for (let index = toTheUp; index > 0; index--) {
+      let key = `${toTheUp},${column}`;
+      let withWall = this.findValueByKey(coord, key);
+      let value = withWall[key];
+
+      toTheUp--;
+      contToTheUp++;
+
+      if (value != null && value == ROOM.WITHOUT_WALL) {
+        roomsWithOutWallToTheUp++;
+        continue;
+      }
+
+      if (value != null && value == ROOM.WITH_WALL) {
+        roomsWithWallToTheUp++;
+        if (roomsWithWallToTheUp == 1) {
+          totalToTheUp = roomsWithOutWallToTheUp;
+        }
+
         break;
       }
-      toTheUp--;
-      roomsWithOutWallToTheUp++;
+
+      if (value != null && value == ROOM.WITH_LIGHT) {
+        thereAreLightToTheUp = true;
+        distanceFromCurrentPointToLightToUp = contToTheUp - 1;
+        totalToTheUp = roomsWithOutWallToTheUp;
+        if (roomsWithWallToTheUp > 0) thereAreWallToTheUp = true;
+
+        break;
+      }
     }
 
-    this.log("Total -> N: " + roomsWithOutWallToTheUp + " en la fila: " + row);
+    if (totalToTheUp == 0) totalToTheUp = roomsWithOutWallToTheUp;
 
     let totalRoomsWithOutWall =
       roomsWithOutWallToTheRight +
       roomsWithOutWallToTheDown +
-      roomsWithOutWallToTheLeft +
-      roomsWithOutWallToTheUp;
+      totalToTheLeft +
+      totalToTheUp;
 
-    if (
-      totalRoomsWithOutWall >= roomsWithLigthAllowedMax
-      //||totalRoomsWithOutWall >= roomsWithLigthAllowedMin
-    )
-      isAllowed = true;
+    if (thereAreLightToTheUp && thereAreLightToTheLeft) {
+      if (thereAreWallToTheUp && thereAreWallToTheLeft) {
+        if (totalRoomsWithOutWall >= roomsWithLigthAllowedMax) {
+          isAllowed = true;
+        } else {
+          isAllowed = false;
+        }
+      } else if (thereAreWallToTheUp && !thereAreWallToTheLeft) {
+        if (distanceFromCurrentPointToLightToLeft >= roomsWithLigthAllowedMax) {
+          if (totalRoomsWithOutWall >= roomsWithLigthAllowedMax)
+            isAllowed = true;
+          else isAllowed = false;
+        } else {
+          isAllowed = false;
+        }
+      } else if (thereAreWallToTheLeft && !thereAreWallToTheUp) {
+        if (distanceFromCurrentPointToLightToUp >= roomsWithLigthAllowedMax) {
+          if (totalRoomsWithOutWall >= roomsWithLigthAllowedMax)
+            isAllowed = true;
+        } else {
+          isAllowed = false;
+        }
+      } else {
+        if (
+          distanceFromCurrentPointToLightToUp >= roomsWithLigthAllowedMax &&
+          distanceFromCurrentPointToLightToLeft >= roomsWithLigthAllowedMax
+        ) {
+          if (totalRoomsWithOutWall >= roomsWithLigthAllowedMax)
+            isAllowed = true;
+        } else {
+          isAllowed = false;
+        }
+      }
+    } else if (thereAreLightToTheUp && !thereAreLightToTheLeft) {
+      if (thereAreWallToTheUp) {
+        if (totalRoomsWithOutWall >= roomsWithLigthAllowedMax) isAllowed = true;
+        else isAllowed = false;
+      } else {
+        if (distanceFromCurrentPointToLightToUp >= roomsWithLigthAllowedMax) {
+          if (totalRoomsWithOutWall >= roomsWithLigthAllowedMax)
+            isAllowed = true;
+        } else {
+          isAllowed = false;
+        }
+      }
+    } else if (thereAreLightToTheLeft && !thereAreLightToTheUp) {
+      if (thereAreWallToTheLeft) {
+        if (totalRoomsWithOutWall >= roomsWithLigthAllowedMax) isAllowed = true;
+        else isAllowed = false;
+      } else {
+        if (distanceFromCurrentPointToLightToLeft >= roomsWithLigthAllowedMax) {
+          if (totalRoomsWithOutWall >= roomsWithLigthAllowedMax)
+            isAllowed = true;
+        } else {
+          isAllowed = false;
+        }
+      }
+    } else {
+      if (totalRoomsWithOutWall >= roomsWithLigthAllowedMax) isAllowed = true;
+      else isAllowed = false;
+    }
 
     return isAllowed;
   }
 
+  findValueByKeyAndValue(array, key, value = ROOM.WITH_LIGHT) {
+    return array.find(item => item[`${key}`] == 0 && item[`${key}`] != value);
+  }
+
+  findValueByKey(array, key) {
+    return array.find(item => item[`${key}`]);
+  }
   log(msg) {
     //console.log(msg);
   }
