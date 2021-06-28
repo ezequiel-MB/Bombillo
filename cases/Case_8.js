@@ -1,7 +1,8 @@
 const { ROOM } = require("../constants");
 const Helper = require("../Helper");
+const { Validation } = require("../Validation");
 
-class Case_8 {
+class Case_8 extends Validation {
   //n y m son iguales (cuadratica)
   /**
    *    ⬆
@@ -10,7 +11,6 @@ class Case_8 {
   isValid(data, coord) {
     const { sizeRow, sizeColumn, row, column } = data;
     const roomsWithLigthAllowedMax = 4;
-    let isAllowed = false;
 
     let roomsWithOutWallToTheUp = 0;
     let toTheUp = row - 1;
@@ -102,69 +102,16 @@ class Case_8 {
 
     let totalRoomsWithOutWall = totalToTheUp + totalToTheLeft;
 
-    if (thereAreLightToTheUp && thereAreLightToTheLeft) {
-      if (thereAreWallToTheUp && thereAreWallToTheLeft) {
-        if (totalRoomsWithOutWall >= roomsWithLigthAllowedMax) {
-          isAllowed = true;
-        } else {
-          isAllowed = false;
-        }
-      } else if (thereAreWallToTheUp && !thereAreWallToTheLeft) {
-        if (distanceFromCurrentPointToLightToLeft >= roomsWithLigthAllowedMax) {
-          if (totalRoomsWithOutWall >= roomsWithLigthAllowedMax)
-            isAllowed = true;
-          else isAllowed = false;
-        } else {
-          isAllowed = false;
-        }
-      } else if (thereAreWallToTheLeft && !thereAreWallToTheUp) {
-        if (distanceFromCurrentPointToLightToUp >= roomsWithLigthAllowedMax) {
-          if (totalRoomsWithOutWall >= roomsWithLigthAllowedMax)
-            isAllowed = true;
-        } else {
-          isAllowed = false;
-        }
-      } else {
-        if (
-          distanceFromCurrentPointToLightToUp >= roomsWithLigthAllowedMax &&
-          distanceFromCurrentPointToLightToLeft >= roomsWithLigthAllowedMax
-        ) {
-          if (totalRoomsWithOutWall >= roomsWithLigthAllowedMax)
-            isAllowed = true;
-        } else {
-          isAllowed = false;
-        }
-      }
-    } else if (thereAreLightToTheUp && !thereAreLightToTheLeft) {
-      if (thereAreWallToTheUp) {
-        if (totalRoomsWithOutWall >= roomsWithLigthAllowedMax) isAllowed = true;
-        else isAllowed = false;
-      } else {
-        if (distanceFromCurrentPointToLightToUp >= roomsWithLigthAllowedMax) {
-          if (totalRoomsWithOutWall >= roomsWithLigthAllowedMax)
-            isAllowed = true;
-        } else {
-          isAllowed = false;
-        }
-      }
-    } else if (thereAreLightToTheLeft && !thereAreLightToTheUp) {
-      if (thereAreWallToTheLeft) {
-        if (totalRoomsWithOutWall >= roomsWithLigthAllowedMax) isAllowed = true;
-        else isAllowed = false;
-      } else {
-        if (distanceFromCurrentPointToLightToLeft >= roomsWithLigthAllowedMax) {
-          if (totalRoomsWithOutWall >= roomsWithLigthAllowedMax)
-            isAllowed = true;
-        } else {
-          isAllowed = false;
-        }
-      }
-    } else {
-      if (totalRoomsWithOutWall >= roomsWithLigthAllowedMax) isAllowed = true;
-      else isAllowed = false;
-    }
+    let payload = {
+      thereAreLightToTheUp: thereAreLightToTheUp,
+      thereAreLightToTheLeft: thereAreLightToTheLeft,
+      thereAreWallToTheUp: thereAreWallToTheUp,
+      thereAreWallToTheLeft: thereAreWallToTheLeft,
+      totalRoomsWithOutWall: totalRoomsWithOutWall,
+      roomsWithLigthAllowedMa: roomsWithLigthAllowedMax
+    };
 
-    return isAllowed;
+    return this.toTheWestAndNorth(payload);
   }
 }
 

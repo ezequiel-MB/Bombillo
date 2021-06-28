@@ -1,7 +1,8 @@
 const { ROOM } = require("../constants");
 const Helper = require("../Helper");
+const { Validation } = require("../Validation");
 
-class Case_2 {
+class Case_2 extends Validation {
   /**
    *   ⬅ x ➡
    *      ⬇
@@ -11,8 +12,6 @@ class Case_2 {
     const { sizeRow, sizeColumn, row, column } = data;
     const roomsWithLigthAllowedMax = 4;
     const roomsWithLigthAllowedMin = 3;
-
-    let isAllowed = false;
 
     let roomsWithOutWallToTheRight = 0;
     let toTheRight = column + 1;
@@ -86,24 +85,14 @@ class Case_2 {
     let totalRoomsWithOutWall =
       roomsWithOutWallToTheRight + totalToTheLeft + roomsWithOutWallToTheDown;
 
-    if (thereAreLight) {
-      if (thereAreWall) {
-        if (totalRoomsWithOutWall >= roomsWithLigthAllowedMax) isAllowed = true;
-        else isAllowed = false;
-      } else {
-        if (distanceFromCurrentPointToLight >= roomsWithLigthAllowedMax) {
-          if (totalRoomsWithOutWall >= roomsWithLigthAllowedMax)
-            isAllowed = true;
-        } else {
-          isAllowed = false;
-        }
-      }
-    } else {
-      if (totalRoomsWithOutWall >= roomsWithLigthAllowedMax) isAllowed = true;
-      else isAllowed = false;
-    }
+    let payload = {
+      thereAreLight: thereAreLight,
+      thereAreWall: thereAreWall,
+      totalRoomsWithOutWall: totalRoomsWithOutWall,
+      roomsWithLigthAllowedMax: roomsWithLigthAllowedMax
+    };
 
-    return isAllowed;
+    return this.toTheWest(payload);
   }
 }
 

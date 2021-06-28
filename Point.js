@@ -22,9 +22,7 @@ class Point {
 
       let result = Case_1.isValid(data, coord);
 
-      this.log(
-        "Caso 1 es factible: " + result + " coord: " + `${row},${column}`
-      );
+      this.log("Caso 1 es valido: " + result + " coord: " + `${row},${column}`);
 
       return result;
     } else if (row == 1 && column != sizeColumn) {
@@ -34,9 +32,7 @@ class Point {
        *
        */
       let result = Case_2.isValid(data, coord);
-      this.log(
-        "Caso 2 es factible: " + result + " coord: " + `${row},${column}`
-      );
+      this.log("Caso 2 es valido: " + result + " coord: " + `${row},${column}`);
       return result;
     } else if (row == 1 && column == sizeColumn) {
       /*
@@ -55,9 +51,7 @@ class Point {
 
       let result = Case_4.isValid(data, coord);
 
-      this.log(
-        "Caso 4 es factible: " + result + " coord: " + `${row},${column}`
-      );
+      this.log("Caso 4 es valido: " + result + " coord: " + `${row},${column}`);
       return result;
     } else if (column == 1 && row == sizeRow) {
       /**
@@ -66,9 +60,7 @@ class Point {
        */
 
       let result = Case_5.isValid(data, coord);
-      this.log(
-        "Caso 5 es factible: " + result + " coord: " + `${row},${column}`
-      );
+      this.log("Caso 5 es valido: " + result + " coord: " + `${row},${column}`);
       return result;
     } else if (row == sizeRow && column != sizeColumn) {
       /**
@@ -77,9 +69,7 @@ class Point {
        */
 
       let result = Case_6.isValid(data, coord);
-      this.log(
-        "Caso 6 es factible: " + result + " coord: " + `${row},${column}`
-      );
+      this.log("Caso 6 es valido: " + result + " coord: " + `${row},${column}`);
       return result;
     } else if (column == sizeColumn && row != sizeRow) {
       /**
@@ -89,9 +79,7 @@ class Point {
        *
        */
       let result = Case_7.isValid(data, coord);
-      this.log(
-        "Caso 7 es factible: " + result + " coord: " + `${row},${column}`
-      );
+      this.log("Caso 7 es valido: " + result + " coord: " + `${row},${column}`);
       return result;
     } else if (row == sizeRow && column == sizeColumn) {
       //n y m son iguales (cuadratica)
@@ -101,9 +89,7 @@ class Point {
        */
 
       let result = Case_8.isValid(data, coord);
-      this.log(
-        "Caso 8 es factible: " + result + " coord: " + `${row},${column}`
-      );
+      this.log("Caso 8 es valido: " + result + " coord: " + `${row},${column}`);
       return result;
     } else {
       /**
@@ -113,9 +99,7 @@ class Point {
        */
 
       let result = Case_9.isValid(data, coord);
-      this.log(
-        "Caso 9 es factible: " + result + " coord: " + `${row},${column}`
-      );
+      this.log("Caso 9 es valido: " + result + " coord: " + `${row},${column}`);
       return result;
     }
   }
