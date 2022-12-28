@@ -11,7 +11,7 @@ class Bombillo {
     if (!this.isValidData(arrays)) {
       return Helper.process(
         STATUS.FAILED,
-        "La matriz contiene un valor no permitdo."
+        "La matriz contiene un valor no permitido."
       );
     }
 

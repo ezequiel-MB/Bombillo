@@ -27,8 +27,8 @@ class Point {
       return result;
     } else if (row == 1 && column != sizeColumn) {
       /**
-       *   ⬅ x ➡
-       *      ⬇
+       *  ⬅ x ➡
+       *    ⬇
        *
        */
       let result = Case_2.isValid(data, coord);
@@ -37,7 +37,7 @@ class Point {
     } else if (row == 1 && column == sizeColumn) {
       /*
        * ⬅ x
-       *    ⬇
+       *   ⬇
        */
 
       let result = Case_3.isValid(data, coord);
@@ -64,8 +64,8 @@ class Point {
       return result;
     } else if (row == sizeRow && column != sizeColumn) {
       /**
-       *       ⬆
-       *    ⬅ x ➡
+       *    ⬆
+       *  ⬅ x ➡
        */
 
       let result = Case_6.isValid(data, coord);
@@ -84,7 +84,7 @@ class Point {
     } else if (row == sizeRow && column == sizeColumn) {
       //n y m son iguales (cuadratica)
       /**
-       *    ⬆
+       *   ⬆
        * ⬅ x
        */
 
@@ -93,9 +93,9 @@ class Point {
       return result;
     } else {
       /**
-       *     ⬆
+       *    ⬆
        *  ⬅ x ➡
-       *     ⬇
+       *    ⬇
        */
 
       let result = Case_9.isValid(data, coord);
